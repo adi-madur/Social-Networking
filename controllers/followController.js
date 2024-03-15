@@ -97,7 +97,37 @@ const unfollowUser = async (req, res) => {
     }
 }
 
+const followDetails = async (req, res) => {
+    const uid = req.user.id;
+
+    try{
+
+        const userDetails = await followModel.findOne({userId: uid});
+        
+        if (!userDetails) {
+            return res.status(404).json({
+              success: false,
+              msg: "User not found",
+            });
+          }
+
+        return res.status(200).json({
+            success: true,
+            msg: "User's Follow details fetched successfully",
+            following: userDetails.following,
+            followers: userDetails.followers,
+        })
+    } catch (e) {
+        return res.status(500).json({
+            success: false,
+            msg: e.message,
+        })
+    }
+
+}
+
 export {
     followUser,
     unfollowUser,
+    followDetails,
 }
