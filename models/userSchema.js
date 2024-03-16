@@ -9,6 +9,8 @@ const userSchema = new Schema({
         type: String,
         required: true,
         unique: true,
+        trim: true,
+        lowercase: true,
     },
     bio:{
         type: String,
@@ -20,7 +22,9 @@ const userSchema = new Schema({
     },
     password:{
         type: String,
+        required: true,
         select:false,
+        minlength: [6, "Password is too short"],
     },
 } , {
     timestamps: true,

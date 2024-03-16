@@ -1,9 +1,17 @@
 import followModel from './../models/followSchema.js';
+import postModel from './../models/postSchema.js';
 
 const followUser = async (req, res) => {
     try {
         const uid = req.user.id;
         const { userIdToFollow } = req.body;
+
+        if(uid.toString() === userIdToFollow.toString()) {
+            return res.status(400).jsonn({
+                success: false,
+                msg: "You cannot follow / unfollow yourself.",
+            })
+        }
 
         if (!userIdToFollow) {
             return res.status(404).json({
@@ -59,6 +67,13 @@ const unfollowUser = async (req, res) => {
         const uid = req.user.id;
         const { userIdToUnfollow } = req.body;
 
+        if(uid.toString() === userIdToUnfollow.toString()) {
+            return res.status(400).jsonn({
+                success: false,
+                msg: "You cannot follow / unfollow yourself.",
+            })
+        }
+
         const authenticatedUser = await followModel.findOne({ userId: uid });
 
         const userToUnfollow = await followModel.findOne({ userId: userIdToUnfollow });
@@ -100,16 +115,16 @@ const unfollowUser = async (req, res) => {
 const followDetails = async (req, res) => {
     const uid = req.user.id;
 
-    try{
+    try {
 
-        const userDetails = await followModel.findOne({userId: uid});
-        
+        const userDetails = await followModel.findOne({ userId: uid });
+
         if (!userDetails) {
             return res.status(404).json({
-              success: false,
-              msg: "User not found",
+                success: false,
+                msg: "User not found",
             });
-          }
+        }
 
         return res.status(200).json({
             success: true,
@@ -126,8 +141,43 @@ const followDetails = async (req, res) => {
 
 }
 
+const userFeed = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // Get the document of the authenticated user from the followModel
+        const userFollowDoc = await followModel.findOne({ userId });
+
+        // Use the Aggregation Framework to fetch posts from the followed users
+        const userFeed = await postModel.aggregate([
+            {
+                $match: {
+                    userId: { $in: userFollowDoc.following },
+                },
+            },
+            {
+                $sort: {
+                    createdAt: -1, // Sort by createdAt in descending order (most recent first)
+                },
+            },
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            msg: "User's feed fetched successfully",
+            data: userFeed,
+        });
+    } catch (e) {
+        res.status(500).json({
+            success: false,
+            msg: e.message,
+        });
+    }
+}
+
 export {
     followUser,
     unfollowUser,
     followDetails,
+    userFeed,
 }

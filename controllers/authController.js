@@ -1,7 +1,7 @@
 import followModel from "../models/followSchema.js";
-import userModel from "../models/userSchema.js";
+import userModel from './../models/userSchema.js';
+import postModel from './../models/postSchema.js';
 
-// import emailValidator from 'email-validator'; 
 import bcrypt from 'bcrypt';
 
 const signup = async (req, res, next) => {
@@ -200,10 +200,61 @@ const updateUser = async (req, res) => {
 
 }
 
+const deleteUser = async (req, res) => {
+
+    const userId = req.user.id;
+    // User must be signed in, then First account is deleted, then logout.
+    try {
+        // Deleting an account from userModel
+        const userResult = await userModel.findByIdAndDelete(userId);
+        // Deleting follow list too
+        const followResult = await followModel.findOneAndDelete({ userId });
+
+        // Delete userId from `following` & `followers` from all other users
+        const followDocuments = await followModel.find({
+            $or: [{ following: userId }, { followers: userId }],
+        });
+
+        for (const followDocument of followDocuments) {
+            followDocument.following = followDocument.following.filter(
+                (id) => id.toString() !== userId.toString()
+            );
+            followDocument.followers = followDocument.followers.filter(
+                (id) => id.toString() !== userId.toString()
+            );
+            await followDocument.save();
+        }
+
+        // Delete all posts created by the user
+        await postModel.deleteMany({ userId });
+
+        // Deleting Cookie and Logging Out
+        const cookieOption = {
+            expires: new Date(),
+            httpOnly: true,
+        }
+
+        res.cookie("token", null, cookieOption);
+
+        return res.status(200).json({
+            success: true,
+            message: "User Deleted and Logged Out successfully",
+        })
+
+    } catch (e) {
+        return res.status(500).json({
+            success: false,
+            message: e.message,
+        })
+    }
+
+}
+
 export {
     signup,
     signin,
     getUser,
     logout,
     updateUser,
+    deleteUser,
 }
