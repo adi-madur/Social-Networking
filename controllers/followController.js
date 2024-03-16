@@ -1,10 +1,14 @@
 import followModel from './../models/followSchema.js';
 import postModel from './../models/postSchema.js';
+import inputValidator from './../middlewares/validator.js';
 
 let followUser = async (req, res) => {
     try {
         let uid = req.user.id;
         let { userIdToFollow } = req.body;
+
+        uid = inputValidator(uid);
+        userIdToFollow = inputValidator(userIdToFollow);
 
         if(uid.toString() === userIdToFollow.toString()) {
             return res.status(400).jsonn({
@@ -67,6 +71,10 @@ let unfollowUser = async (req, res) => {
         let uid = req.user.id;
         let { userIdToUnfollow } = req.body;
 
+        uid = inputValidator(uid);
+        userIdToUnfollow = inputValidator(userIdToUnfollow);
+
+
         if(uid.toString() === userIdToUnfollow.toString()) {
             return res.status(400).jsonn({
                 success: false,
@@ -115,6 +123,8 @@ let unfollowUser = async (req, res) => {
 let followDetails = async (req, res) => {
     let uid = req.user.id;
 
+    uid = inputValidator(uid);
+
     try {
 
         let userDetails = await followModel.findOne({ userId: uid });
@@ -144,6 +154,8 @@ let followDetails = async (req, res) => {
 let userFeed = async (req, res) => {
     try {
         let userId = req.user.id;
+        userId = inputValidator(userId);
+
 
         // Get the document of the authenticated user from the followModel
         let userFollowDoc = await followModel.findOne({ userId });

@@ -9,9 +9,6 @@ let signup = async (req, res, next) => {
     let { username, password, pfpurl, bio } = req.body;
     // Validating
     username = inputValidator(username);
-    password = inputValidator(password);
-    if (bio) bio = inputValidator(bio);
-    if (pfpurl) pfpurl = inputValidator(pfpurl);
 
     // Checking if all fields are provided
     if (!username || !password) {
@@ -74,7 +71,6 @@ let signin = async (req, res) => {
     let { username, password } = req.body;
 
     username = inputValidator(username);
-    password = inputValidator(password);
 
     if (!username || !password) {
         return res.status(400).json({
@@ -172,9 +168,6 @@ let updateUser = async (req, res) => {
     let { username, bio, pfpurl, password } = req.body;
 
     username = inputValidator(username);
-    password = inputValidator(password);
-    if (bio) bio = inputValidator(bio);
-    if (pfpurl) pfpurl = inputValidator(pfpurl);
 
     try {
 

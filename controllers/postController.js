@@ -7,7 +7,6 @@ let createPost = async (req, res) => {
     let { content } = req.body;
 
     userId = inputValidator(userId);
-    content = inputValidator(content);
 
     if(!content) {
         return res.status(404).json({
@@ -50,6 +49,7 @@ let viewPost = async (req, res) => {
 
     res.status(200).json({
         success: true,
+        msg: "User's Post's fetched Successfully",
         posts: result
     })
 
@@ -103,7 +103,6 @@ let updatePost = async (req, res) => {
     let { postId, content } = req.body;
     uid = inputValidator(uid);
     postId = inputValidator(postId);
-    content = inputValidator(content);
 
 
     if(!content) {
