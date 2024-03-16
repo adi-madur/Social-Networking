@@ -2,7 +2,7 @@ import express from'express';
 import { signup, signin, getUser, logout, updateUser, deleteUser } from '../controllers/authController.js';
 import jwtAuth from '../middlewares/jwtAuth.js';
 
-const authRouter = express.Router();
+let authRouter = express.Router();
 
 authRouter.post('/signup', signup);
 authRouter.post('/signin', signin);

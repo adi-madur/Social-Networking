@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
 
-const { Schema } = mongoose;
+let { Schema } = mongoose;
 
-const userSchema = new Schema({
+let userSchema = new Schema({
     username: {
         type: String,
         required: true,
@@ -54,5 +54,5 @@ userSchema.methods = {
     }
 }
 
-const userModel = mongoose.model('users', userSchema);
+let userModel = mongoose.model('users', userSchema);
 export default userModel;

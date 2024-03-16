@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-const { Schema } = mongoose;
+let { Schema } = mongoose;
 
-const followSchema = new Schema({
+let followSchema = new Schema({
     userId: {
         type: String,
         required: true,
@@ -15,6 +15,6 @@ const followSchema = new Schema({
     },
 })
 
-const followModel = mongoose.model('follow', followSchema);
+let followModel = mongoose.model('follow', followSchema);
 
 export default followModel;

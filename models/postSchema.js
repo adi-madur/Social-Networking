@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-const { Schema } = mongoose;
+let { Schema } = mongoose;
 
-const postSchema = new Schema({
+let postSchema = new Schema({
     userId: {
         type: String,
         required: true,
@@ -14,6 +14,6 @@ const postSchema = new Schema({
     timestamps: true,
 })
 
-const postModel = mongoose.model("posts", postSchema);
+let postModel = mongoose.model("posts", postSchema);
 
 export default postModel;

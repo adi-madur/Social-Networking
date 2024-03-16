@@ -1,11 +1,17 @@
 import followModel from "../models/followSchema.js";
 import userModel from './../models/userSchema.js';
 import postModel from './../models/postSchema.js';
+import inputValidator from './../middlewares/validator.js';
 
 import bcrypt from 'bcrypt';
 
-const signup = async (req, res, next) => {
-    const { username, password, pfpurl, bio } = req.body;
+let signup = async (req, res, next) => {
+    let { username, password, pfpurl, bio } = req.body;
+    // Validating
+    username = inputValidator(username);
+    password = inputValidator(password);
+    if (bio) bio = inputValidator(bio);
+    if (pfpurl) pfpurl = inputValidator(pfpurl);
 
     // Checking if all fields are provided
     if (!username || !password) {
@@ -17,14 +23,14 @@ const signup = async (req, res, next) => {
 
     try {
 
-        const userInfo = userModel(req.body);
-        const result = await userInfo.save();
+        let userInfo = userModel(req.body);
+        let result = await userInfo.save();
 
 
         // Creating empty followers and following list of the user
-        const createUserFollowDoc = async (userId) => {
+        let createUserFollowDoc = async (userId) => {
             try {
-                const newFollowDoc = new followModel({
+                let newFollowDoc = new followModel({
                     userId,
                     followers: [],
                     following: [],
@@ -64,8 +70,11 @@ const signup = async (req, res, next) => {
 
 }
 
-const signin = async (req, res) => {
-    const { username, password } = req.body;
+let signin = async (req, res) => {
+    let { username, password } = req.body;
+
+    username = inputValidator(username);
+    password = inputValidator(password);
 
     if (!username || !password) {
         return res.status(400).json({
@@ -75,7 +84,7 @@ const signin = async (req, res) => {
     }
 
     try {
-        const user = await userModel
+        let user = await userModel
             .findOne({ username })
             .select('+password')
 
@@ -87,12 +96,12 @@ const signin = async (req, res) => {
         }
 
         // Generating Token for a User
-        const token = user.jwtToken();
+        let token = user.jwtToken();
         // Since we don't need password now, we'll clear it
         user.password = undefined;
 
         // Creating Cookie as Object
-        const cookieOption = {
+        let cookieOption = {
             maxAge: 24 * 60 * 60 * 1000, //--> 24 h in milliseconds
             httpOnly: true,
         }
@@ -115,11 +124,12 @@ const signin = async (req, res) => {
 
 }
 
-const getUser = async (req, res) => {
-    const userId = req.user.id;
+let getUser = async (req, res) => {
+    let userId = req.user.id;
 
+    userId = inputValidator(userId);
     try {
-        const user = await userModel.findById(userId);
+        let user = await userModel.findById(userId);
         return res.status(200).json({
             success: true,
             message: "User details fetched successfully",
@@ -133,11 +143,11 @@ const getUser = async (req, res) => {
     }
 }
 
-const logout = (req, res) => {
+let logout = (req, res) => {
     // To Logout, the user must be first logged in. Hence the flow goes to `jwtAuth` middleware first
     // And the method to log out is just deleting the token / cookie.
     try {
-        const cookieOption = {
+        let cookieOption = {
             expires: new Date(),
             httpOnly: true,
         }
@@ -157,12 +167,18 @@ const logout = (req, res) => {
     }
 }
 
-const updateUser = async (req, res) => {
-    const userId = req.user.id;
-    const { username, bio, pfpurl, password } = req.body;
+let updateUser = async (req, res) => {
+    let userId = req.user.id;
+    let { username, bio, pfpurl, password } = req.body;
+
+    username = inputValidator(username);
+    password = inputValidator(password);
+    if (bio) bio = inputValidator(bio);
+    if (pfpurl) pfpurl = inputValidator(pfpurl);
+
     try {
 
-        const updateFields = {};
+        let updateFields = {};
 
         // Building the update object with only the fields that are provided in the request body
         if (username) updateFields.username = username;
@@ -179,7 +195,7 @@ const updateUser = async (req, res) => {
             });
         }
 
-        const newUserDetails = await userModel.findByIdAndUpdate(
+        let newUserDetails = await userModel.findByIdAndUpdate(
             userId,
             { $set: updateFields },
             { new: true }
@@ -200,22 +216,23 @@ const updateUser = async (req, res) => {
 
 }
 
-const deleteUser = async (req, res) => {
+let deleteUser = async (req, res) => {
 
-    const userId = req.user.id;
+    let userId = req.user.id;
+    userId = inputValidator(userId);
     // User must be signed in, then First account is deleted, then logout.
     try {
         // Deleting an account from userModel
-        const userResult = await userModel.findByIdAndDelete(userId);
+        await userModel.findByIdAndDelete(userId);
         // Deleting follow list too
-        const followResult = await followModel.findOneAndDelete({ userId });
+        await followModel.findOneAndDelete({ userId });
 
         // Delete userId from `following` & `followers` from all other users
-        const followDocuments = await followModel.find({
+        let followDocuments = await followModel.find({
             $or: [{ following: userId }, { followers: userId }],
         });
 
-        for (const followDocument of followDocuments) {
+        for (let followDocument of followDocuments) {
             followDocument.following = followDocument.following.filter(
                 (id) => id.toString() !== userId.toString()
             );
@@ -229,7 +246,7 @@ const deleteUser = async (req, res) => {
         await postModel.deleteMany({ userId });
 
         // Deleting Cookie and Logging Out
-        const cookieOption = {
+        let cookieOption = {
             expires: new Date(),
             httpOnly: true,
         }

@@ -1,9 +1,13 @@
 import postModel from './../models/postSchema.js';
+import inputValidator from './../middlewares/validator.js';
 
-const createPost = async (req, res) => {
-    const userId = req.user.id;
+let createPost = async (req, res) => {
+    let userId = req.user.id;
 
-    const { content } = req.body;
+    let { content } = req.body;
+
+    userId = inputValidator(userId);
+    content = inputValidator(content);
 
     if(!content) {
         return res.status(404).json({
@@ -12,7 +16,7 @@ const createPost = async (req, res) => {
         })
     }
 
-    const postAlreadyExists = await postModel.findOne({
+    let postAlreadyExists = await postModel.findOne({
         content,
         userId,
     })
@@ -24,12 +28,12 @@ const createPost = async (req, res) => {
         })
     }
     
-    const postInfo = postModel({
+    let postInfo = postModel({
         userId,
         content,
     })
 
-    const result = await postInfo.save()
+    let result = await postInfo.save()
 
     return res.status(200).json({
         success: true,
@@ -39,10 +43,10 @@ const createPost = async (req, res) => {
 
 }
 
-const viewPost = async (req, res) => {
-    const userId = req.user.id;
-
-    const result = await postModel.find({userId});
+let viewPost = async (req, res) => {
+    let userId = req.user.id;
+    userId = inputValidator(userId);
+    let result = await postModel.find({userId});
 
     res.status(200).json({
         success: true,
@@ -51,12 +55,15 @@ const viewPost = async (req, res) => {
 
 }
 
-const deletePost = async (req, res) => {
-    const uid = req.user.id;
+let deletePost = async (req, res) => {
+    let uid = req.user.id;
 
-    const { postId } = req.body;
+    let { postId } = req.body;
 
-    const postDetails = await postModel.findById(postId);
+    uid = inputValidator(uid);
+    postId = inputValidator(postId);
+
+    let postDetails = await postModel.findById(postId);
 
     if(!postDetails) {
         return res.status(400).json({
@@ -73,7 +80,7 @@ const deletePost = async (req, res) => {
     }
 
     try {
-        const result = await postModel.findByIdAndDelete(postId);
+        let result = await postModel.findByIdAndDelete(postId);
 
         return res.status(200).json({
             success: true,
@@ -91,10 +98,13 @@ const deletePost = async (req, res) => {
 
 }
 
-const updatePost = async (req, res) => {
-    const uid = req.user.id;
+let updatePost = async (req, res) => {
+    let uid = req.user.id;
+    let { postId, content } = req.body;
+    uid = inputValidator(uid);
+    postId = inputValidator(postId);
+    content = inputValidator(content);
 
-    const { postId, content } = req.body;
 
     if(!content) {
         return res.status(404).json({
@@ -103,7 +113,7 @@ const updatePost = async (req, res) => {
         })
     }
 
-    const postDetails = await postModel.findById(postId);
+    let postDetails = await postModel.findById(postId);
 
     if(!postDetails) {
         return res.status(400).json({
@@ -119,7 +129,7 @@ const updatePost = async (req, res) => {
         })
     }
 
-    const result = await postModel.findByIdAndUpdate(postId, { content });
+    let result = await postModel.findByIdAndUpdate(postId, { content });
 
     return res.status(200).json({
         success: true,

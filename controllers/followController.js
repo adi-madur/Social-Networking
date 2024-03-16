@@ -1,10 +1,10 @@
 import followModel from './../models/followSchema.js';
 import postModel from './../models/postSchema.js';
 
-const followUser = async (req, res) => {
+let followUser = async (req, res) => {
     try {
-        const uid = req.user.id;
-        const { userIdToFollow } = req.body;
+        let uid = req.user.id;
+        let { userIdToFollow } = req.body;
 
         if(uid.toString() === userIdToFollow.toString()) {
             return res.status(400).jsonn({
@@ -21,10 +21,10 @@ const followUser = async (req, res) => {
         }
 
         // Find the authenticated user's document
-        const authenticatedUser = await followModel.findOne({ userId: uid });
+        let authenticatedUser = await followModel.findOne({ userId: uid });
 
         // Find the user document to be followed
-        const userToFollow = await followModel.findOne({ userId: userIdToFollow });
+        let userToFollow = await followModel.findOne({ userId: userIdToFollow });
 
         if (!userToFollow) {
             return res.status(404).json({
@@ -62,10 +62,10 @@ const followUser = async (req, res) => {
     }
 }
 
-const unfollowUser = async (req, res) => {
+let unfollowUser = async (req, res) => {
     try {
-        const uid = req.user.id;
-        const { userIdToUnfollow } = req.body;
+        let uid = req.user.id;
+        let { userIdToUnfollow } = req.body;
 
         if(uid.toString() === userIdToUnfollow.toString()) {
             return res.status(400).jsonn({
@@ -74,9 +74,9 @@ const unfollowUser = async (req, res) => {
             })
         }
 
-        const authenticatedUser = await followModel.findOne({ userId: uid });
+        let authenticatedUser = await followModel.findOne({ userId: uid });
 
-        const userToUnfollow = await followModel.findOne({ userId: userIdToUnfollow });
+        let userToUnfollow = await followModel.findOne({ userId: userIdToUnfollow });
 
         // Check if the authenticated user is following the user
         if (!authenticatedUser.following.includes(userIdToUnfollow)) {
@@ -112,12 +112,12 @@ const unfollowUser = async (req, res) => {
     }
 }
 
-const followDetails = async (req, res) => {
-    const uid = req.user.id;
+let followDetails = async (req, res) => {
+    let uid = req.user.id;
 
     try {
 
-        const userDetails = await followModel.findOne({ userId: uid });
+        let userDetails = await followModel.findOne({ userId: uid });
 
         if (!userDetails) {
             return res.status(404).json({
@@ -141,15 +141,15 @@ const followDetails = async (req, res) => {
 
 }
 
-const userFeed = async (req, res) => {
+let userFeed = async (req, res) => {
     try {
-        const userId = req.user.id;
+        let userId = req.user.id;
 
         // Get the document of the authenticated user from the followModel
-        const userFollowDoc = await followModel.findOne({ userId });
+        let userFollowDoc = await followModel.findOne({ userId });
 
         // Use the Aggregation Framework to fetch posts from the followed users
-        const userFeed = await postModel.aggregate([
+        let userFeed = await postModel.aggregate([
             {
                 $match: {
                     userId: { $in: userFollowDoc.following },
